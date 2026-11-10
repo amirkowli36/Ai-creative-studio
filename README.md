@@ -46,6 +46,10 @@ Colab free GPU access is not guaranteed. Sessions can be interrupted and their l
 5. Add image-to-video workflows.
 6. Add 3D generation workflows.
 
+## Automation
+
+The repository includes a manually triggered OpenAI + ComfyUI pipeline. See [Automation setup](docs/AUTOMATION_SETUP.md) for credentials, connection checks, image generation, and result downloads.
+
 ## Important limitations and safety
 
 - Model weights are large and must not be committed to Git. Keep them in Drive or download them into a temporary runtime.
