@@ -78,6 +78,8 @@ def openai_headers():
 
 
 def check_openai():
+    if not os.getenv("OPENAI_API_KEY", "").strip():
+        return None
     models = request_json("https://api.openai.com/v1/models", headers=openai_headers(), timeout=30)
     return len(models.get("data", [])) if isinstance(models, dict) else 0
 
@@ -98,7 +100,11 @@ def health_check():
     print(f"Endpoint host: {host}")
     print(f"Node types: {len(nodes)}")
     print(f"Checkpoint files: {count}")
-    print(f"OpenAI API models visible: {check_openai()}")
+    openai_count = check_openai()
+    if openai_count is None:
+        print("OpenAI API: disabled (no key; raw-prompt mode is available)")
+    else:
+        print(f"OpenAI API: connected ({openai_count} models visible)")
     if count == 0:
         print("Warning: no checkpoint inventory was returned. Generation may need a model filename.")
     return 0
@@ -122,6 +128,9 @@ def response_text(result):
 
 
 def enhance_prompt(user_prompt):
+    if not os.getenv("OPENAI_API_KEY", "").strip():
+        print("OpenAI prompt enhancement is disabled; using the original prompt.")
+        return user_prompt
     model = os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-luna"
     payload = {
         "model": model,
@@ -174,8 +183,11 @@ def replace_tokens(value, replacements):
     if isinstance(value, list):
         return [replace_tokens(v, replacements) for v in value]
     if isinstance(value, str):
+        if value in replacements:
+            return replacements[value]
         for key, replacement in replacements.items():
-            value = value.replace(key, replacement)
+            if isinstance(replacement, str):
+                value = value.replace(key, replacement)
     return value
 
 
@@ -213,10 +225,10 @@ def generate(prompt, workflow_path, width, height, steps):
             "{{PROMPT}}": improved,
             "{{NEGATIVE_PROMPT}}": "low quality, blurry, distorted anatomy, artifacts, watermark, text",
             "{{CHECKPOINT}}": checkpoint,
-            "{{WIDTH}}": str(width),
-            "{{HEIGHT}}": str(height),
-            "{{STEPS}}": str(steps),
-            "{{SEED}}": str(seed),
+            "{{WIDTH}}": width,
+            "{{HEIGHT}}": height,
+            "{{STEPS}}": steps,
+            "{{SEED}}": seed,
         },
     )
     if "{{" in json.dumps(workflow):
