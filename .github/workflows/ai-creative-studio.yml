@@ -48,18 +48,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
-      OPENAI_API_KEY: \${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: \${{ vars.OPENAI_MODEL }}
-      COMFYUI_BASE_URL: \${{ secrets.COMFYUI_BASE_URL }}
-      COMFYUI_CHECKPOINT: \${{ vars.COMFYUI_CHECKPOINT }}
-      COMFYUI_CF_ACCESS_CLIENT_ID: \${{ secrets.COMFYUI_CF_ACCESS_CLIENT_ID }}
-      COMFYUI_CF_ACCESS_CLIENT_SECRET: \${{ secrets.COMFYUI_CF_ACCESS_CLIENT_SECRET }}
-      STUDIO_MODE: \${{ inputs.mode }}
-      STUDIO_PROMPT: \${{ inputs.prompt }}
-      STUDIO_WORKFLOW_PATH: \${{ inputs.workflow_path }}
-      STUDIO_WIDTH: \${{ inputs.width }}
-      STUDIO_HEIGHT: \${{ inputs.height }}
-      STUDIO_STEPS: \${{ inputs.steps }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+      COMFYUI_BASE_URL: ${{ secrets.COMFYUI_BASE_URL }}
+      COMFYUI_CHECKPOINT: ${{ vars.COMFYUI_CHECKPOINT }}
+      COMFYUI_CF_ACCESS_CLIENT_ID: ${{ secrets.COMFYUI_CF_ACCESS_CLIENT_ID }}
+      COMFYUI_CF_ACCESS_CLIENT_SECRET: ${{ secrets.COMFYUI_CF_ACCESS_CLIENT_SECRET }}
+      STUDIO_MODE: ${{ inputs.mode }}
+      STUDIO_PROMPT: ${{ inputs.prompt }}
+      STUDIO_WORKFLOW_PATH: ${{ inputs.workflow_path }}
+      STUDIO_WIDTH: ${{ inputs.width }}
+      STUDIO_HEIGHT: ${{ inputs.height }}
+      STUDIO_STEPS: ${{ inputs.steps }}
 
     steps:
       - name: Check out repository
@@ -85,7 +85,7 @@ jobs:
         if: always() && inputs.mode == 'generate-image'
         uses: actions/upload-artifact@v4
         with:
-          name: ai-creative-studio-output-\${{ github.run_id }}
+          name: ai-creative-studio-output-${{ github.run_id }}
           path: studio-output/
           if-no-files-found: warn
           retention-days: 7
