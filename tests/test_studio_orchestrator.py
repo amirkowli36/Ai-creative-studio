@@ -11,12 +11,28 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(graph["1"]["class_type"], "CheckpointLoaderSimple")
         self.assertEqual(graph["7"]["class_type"], "SaveImage")
 
-    def test_placeholder_replacement(self):
+    def test_placeholder_replacement_preserves_numeric_types(self):
         value = replace_tokens(
-            {"prompt": "{{PROMPT}}", "dims": ["{{WIDTH}}"]},
-            {"{{PROMPT}}": "cinematic portrait", "{{WIDTH}}": "768"},
+            {
+                "prompt": "{{PROMPT}}",
+                "width": "{{WIDTH}}",
+                "height": "{{HEIGHT}}",
+                "steps": "{{STEPS}}",
+                "seed": "{{SEED}}",
+            },
+            {
+                "{{PROMPT}}": "cinematic portrait",
+                "{{WIDTH}}": 768,
+                "{{HEIGHT}}": 768,
+                "{{STEPS}}": 20,
+                "{{SEED}}": 12345,
+            },
         )
-        self.assertEqual(value, {"prompt": "cinematic portrait", "dims": ["768"]})
+        self.assertEqual(value["prompt"], "cinematic portrait")
+        self.assertIsInstance(value["width"], int)
+        self.assertIsInstance(value["height"], int)
+        self.assertIsInstance(value["steps"], int)
+        self.assertIsInstance(value["seed"], int)
 
     def test_regular_ui_workflow_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
