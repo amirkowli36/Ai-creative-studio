@@ -19,8 +19,9 @@ Open the repository Settings → Secrets and variables → Actions → New repos
 
 | Secret name | Value |
 |---|---|
-| OPENAI_API_KEY | Project API key from OpenAI Platform |
 | COMFYUI_BASE_URL | Current HTTPS base URL for ComfyUI, without a trailing slash |
+
+OpenAI is optional for the zero-cost prompt path. Without OPENAI_API_KEY, the workflow sends your original prompt directly to ComfyUI. Add OPENAI_API_KEY only when you want OpenAI to refine prompts. OpenAI API usage is billed separately from ChatGPT.
 
 Optional secrets for a Cloudflare Access-protected endpoint:
 
@@ -68,7 +69,7 @@ ComfyUI validates the graph when submitted. Missing nodes, missing models or inc
 
 - GitHub Actions is an on-demand runner, not a permanent server.
 - Free Colab runtimes can disconnect; Quick Tunnel URLs change after a restart.
-- OpenAI API usage is billed separately from a ChatGPT subscription.
+- When OPENAI_API_KEY is configured, OpenAI API usage is billed separately from a ChatGPT subscription. Without it, prompt enhancement is bypassed.
 - Images are stored as workflow run artifacts, not committed to Git.
 - The workflow has read-only repository permissions.
 
