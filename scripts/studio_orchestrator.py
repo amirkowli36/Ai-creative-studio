@@ -122,7 +122,7 @@ def response_text(result):
 
 
 def enhance_prompt(user_prompt):
-    model = os.getenv("OPENAI_MODEL", "gpt-6-luna").strip()
+    model = os.getenv("OPENAI_MODEL", "").strip() or "gpt-6-luna"
     payload = {
         "model": model,
         "input": [
