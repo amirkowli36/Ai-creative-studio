@@ -1,0 +1,91 @@
+name: AI Creative Studio Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run a connection check or generate an image"
+        required: true
+        type: choice
+        options:
+          - health-check
+          - generate-image
+      prompt:
+        description: "Image request (used only for generate-image)"
+        required: false
+        type: string
+      workflow_path:
+        description: "ComfyUI API-format workflow JSON"
+        required: true
+        default: "workflows/image/txt2img_api.template.json"
+        type: string
+      width:
+        description: "Image width (256–2048, multiple of 64)"
+        required: true
+        default: "768"
+        type: string
+      height:
+        description: "Image height (256–2048, multiple of 64)"
+        required: true
+        default: "768"
+        type: string
+      steps:
+        description: "Sampling steps (1–60)"
+        required: true
+        default: "20"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-creative-studio-orchestrator
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: Run AI Creative Studio
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      OPENAI_API_KEY: \${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: \${{ vars.OPENAI_MODEL }}
+      COMFYUI_BASE_URL: \${{ secrets.COMFYUI_BASE_URL }}
+      COMFYUI_CHECKPOINT: \${{ vars.COMFYUI_CHECKPOINT }}
+      COMFYUI_CF_ACCESS_CLIENT_ID: \${{ secrets.COMFYUI_CF_ACCESS_CLIENT_ID }}
+      COMFYUI_CF_ACCESS_CLIENT_SECRET: \${{ secrets.COMFYUI_CF_ACCESS_CLIENT_SECRET }}
+      STUDIO_MODE: \${{ inputs.mode }}
+      STUDIO_PROMPT: \${{ inputs.prompt }}
+      STUDIO_WORKFLOW_PATH: \${{ inputs.workflow_path }}
+      STUDIO_WIDTH: \${{ inputs.width }}
+      STUDIO_HEIGHT: \${{ inputs.height }}
+      STUDIO_STEPS: \${{ inputs.steps }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check connections
+        if: inputs.mode == 'health-check'
+        run: python scripts/studio_orchestrator.py --mode health-check
+      - name: Generate image
+        if: inputs.mode == 'generate-image'
+        run: |
+          python scripts/studio_orchestrator.py \
+            --mode generate-image \
+            --prompt "$STUDIO_PROMPT" \
+            --workflow-path "$STUDIO_WORKFLOW_PATH" \
+            --width "$STUDIO_WIDTH" \
+            --height "$STUDIO_HEIGHT" \
+            --steps "$STUDIO_STEPS"
+      - name: Upload generated images
+        if: always() && inputs.mode == 'generate-image'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-creative-studio-output-\${{ github.run_id }}
+          path: studio-output/
+          if-no-files-found: warn
+          retention-days: 7
